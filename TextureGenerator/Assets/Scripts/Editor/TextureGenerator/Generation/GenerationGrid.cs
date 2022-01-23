@@ -3,10 +3,9 @@ using UnityEngine;
 using UnityEditor;
 
 public class GenerationGrid : EditorWindow {
-    [MenuItem("TextureGenerator/Generation")]
+    [MenuItem("TextureGenerator/Generation/Grid")]
     public static void OpenWindow() {
         EditorWindow window = GetWindow<GenerationGrid>();
-        window.titleContent = new GUIContent("Ground Texture Generator");
         window.maxSize = new Vector2(500, 500);
         window.minSize = new Vector2(200, 200);
         window.Show();
@@ -15,7 +14,7 @@ public class GenerationGrid : EditorWindow {
     #region Internal Fields
     private Color _color1 = Color.red;
     private Color _color2 = Color.green;
-    private int[] _lengthOptions = new int[] { 64, 128, 256, 512, 1024, 2048 };
+    private int[] _lengthOptions = new int[] { 128, 256, 512, 1024 };
     private int _selectedLength = -1;
     private int _chunkLength = 32;
     private bool _statusChanged = false;
