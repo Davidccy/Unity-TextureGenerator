@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEditor;
 
-public class ProcessingSplit : EditorWindow {
+public class ProcessingSplit : TextureGeneratorWindow<ProcessingSplit> {
     [MenuItem("TextureGenerator/Processing/Split")]
     public static void OpenWindow() {
         ProcessingSplit window = GetWindow<ProcessingSplit>();
@@ -11,29 +11,37 @@ public class ProcessingSplit : EditorWindow {
     }
 
     #region Internal Fields
+    private bool _targetTextureChanged = false;
+    private bool _splitOptionChanged = false;
+
     private Texture2D _targetTexture = null;
     private Texture2D _textureToSplit = null;
+
     private List<byte[]> _texture2DByteDataList = null;
 
-    private bool _targetTextureChanged = false;
-    private bool _splitSettingChanged = false;
-
-    private bool _orderReverseX = false;
-    private bool _orderReverseY = false;
-
+    // Split options
     private int _splitCountX = 0;
     private int _splitCountY = 0;
+
+    // Output order options
+    private bool _orderReverseX = false;
+    private bool _orderReverseY = false;
     #endregion
 
     #region Editor Window Hooks
-    private void OnGUI() {
+    protected override void OnGUIContent() {
         // Target texture selection
-        EditorGUILayout.LabelField("Texture Selection");
+        DrawCommonTitle("Select Texture");
+
         EditorGUILayout.BeginHorizontal();
         EditorGUILayout.LabelField("Target texture", GUILayout.Width(100));
         Texture2D tex = (Texture2D) EditorGUILayout.ObjectField(_targetTexture, typeof(Texture2D), true, GUILayout.Width(150));
         EditorGUILayout.EndHorizontal();
         if (tex != null) {
+            EditorGUILayout.Space();
+            EditorGUILayout.Space();
+
+            DrawCommonTitle("Texture Info");
             EditorGUILayout.LabelField(string.Format("Width: {0} px,   Height: {1} px,   Format: {2}",
                 tex.width, tex.height, tex.format.ToString()));
         }
@@ -98,25 +106,25 @@ public class ProcessingSplit : EditorWindow {
         //
 
         if (_textureToSplit != null) {
-            EditorGUILayout.LabelField("Split Settings");
+            DrawCommonTitle("Split Options");
             int splitCountX = EditorGUILayout.IntSlider(_splitCountX, 1, 12, GUILayout.Width(200));
             if (splitCountX != _splitCountX) {
                 _splitCountX = splitCountX;
-                _splitSettingChanged = true;
+                _splitOptionChanged = true;
             }
             int splitCountY = EditorGUILayout.IntSlider(_splitCountY, 1, 12, GUILayout.Width(200));
             if (splitCountY != _splitCountY) {
                 _splitCountY = splitCountY;
-                _splitSettingChanged = true;
+                _splitOptionChanged = true;
             }
 
             EditorGUILayout.Space();
             EditorGUILayout.Space();
         }
 
-        if (_targetTextureChanged || _splitSettingChanged) {
+        if (_targetTextureChanged || _splitOptionChanged) {
             _targetTextureChanged = false;
-            _splitSettingChanged = false;
+            _splitOptionChanged = false;
 
             if (_textureToSplit != null) {
                 _texture2DByteDataList = new List<byte[]>();
@@ -164,9 +172,13 @@ public class ProcessingSplit : EditorWindow {
         //
         //                 X reverse off    X reverse on
         //
+        // 
+        // Default: X reverse off, Y reverse off
+        //
 
         if (_textureToSplit != null && _texture2DByteDataList != null) {
-            EditorGUILayout.LabelField("Output Order Settings");
+            DrawCommonTitle("Output Order Options");
+
             EditorGUILayout.BeginHorizontal();
             EditorGUILayout.LabelField("X order reverse", GUILayout.Width(100));
             bool orderReverseX = EditorGUILayout.Toggle(_orderReverseX);
@@ -189,7 +201,8 @@ public class ProcessingSplit : EditorWindow {
 
         // Preview
         if (_texture2DByteDataList != null) {
-            EditorGUILayout.LabelField("Preview");
+            DrawCommonTitle("Preview");
+
             Texture2D ttPreview = new Texture2D(0, 0, TextureFormat.ARGB32, false);
 
             for (int y = _splitCountY - 1; y >= 0; y--) {
@@ -211,9 +224,11 @@ public class ProcessingSplit : EditorWindow {
 
         EditorGUILayout.Space();
         EditorGUILayout.Space();
+        EditorGUILayout.Space();
+        EditorGUILayout.Space();
 
         // Output
-        if (GUILayout.Button("Split !")) {
+        DrawGenerationButton(() => {
             for (int y = _splitCountY - 1; y >= 0; y--) {
                 for (int x = 0; x < _splitCountX; x++) {
                     int subTextureIndex = y * _splitCountX + x;
@@ -227,7 +242,7 @@ public class ProcessingSplit : EditorWindow {
                 }
             }
             AssetDatabase.Refresh();
-        }
+        });
     }
     #endregion
 }

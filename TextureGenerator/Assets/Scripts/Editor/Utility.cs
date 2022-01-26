@@ -1,8 +1,11 @@
 ﻿using UnityEngine;
 
 public static class Utility {
+    #region Common Definitions
     public static string OUTPUT_PATH_ROOT = "Assets/Textures/Outputs";
+    #endregion
 
+    #region APIs
     public static Texture2D ConvertToReadableAndDecompressed(Texture2D tex) {
         // NOTE:
         // Following Texture2D functions can not be executed if texture is not readable
@@ -14,7 +17,6 @@ public static class Utility {
         }
 
         Texture2D newTexture = tex.Decompress();
-
 
         return newTexture;
     }
@@ -77,4 +79,5 @@ public static class Utility {
 
         return false;
     }
+    #endregion
 }

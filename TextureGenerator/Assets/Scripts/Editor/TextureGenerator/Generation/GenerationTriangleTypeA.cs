@@ -2,7 +2,7 @@
 using UnityEngine;
 using UnityEditor;
 
-public class GenerationTriangleTypeA : EditorWindow {
+public class GenerationTriangleTypeA : TextureGeneratorWindow<GenerationTriangleTypeA> {
     [MenuItem("TextureGenerator/Generation/TriangleTypeA")]
     public static void OpenWindow() {
         GenerationTriangleTypeA window = GetWindow<GenerationTriangleTypeA>();
@@ -24,7 +24,7 @@ public class GenerationTriangleTypeA : EditorWindow {
     #endregion
 
     #region Editor Window Hooks
-    private void OnGUI() {
+    protected override void OnGUIContent() {
         // Init
         if (_selectedLength == -1) {
             _selectedLength = _defaultLength;
@@ -32,15 +32,24 @@ public class GenerationTriangleTypeA : EditorWindow {
         }
 
         // Color
-        EditorGUILayout.LabelField("Color");
+        DrawCommonTitle("Select Color");
+
+        // Color - color 1
+        EditorGUILayout.BeginHorizontal();
+        EditorGUILayout.LabelField("Color 1", GUILayout.Width(70));
         Color color1 = EditorGUILayout.ColorField(_color1);
-        if (color1 != _color1) {
+        EditorGUILayout.EndHorizontal();
+        if (_color1 != color1) {
             _color1 = color1;
             _optionChanged = true;
         }
 
+        // Color - color 2
+        EditorGUILayout.BeginHorizontal();
+        EditorGUILayout.LabelField("Color 2", GUILayout.Width(70));
         Color color2 = EditorGUILayout.ColorField(_color2);
-        if (color2 != _color2) {
+        EditorGUILayout.EndHorizontal();
+        if (_color2 != color2) {
             _color2 = color2;
             _optionChanged = true;
         }
@@ -49,7 +58,7 @@ public class GenerationTriangleTypeA : EditorWindow {
         EditorGUILayout.Space();
 
         // Size
-        EditorGUILayout.LabelField("Size");
+        DrawCommonTitle("Select Texture Length");
         if (EditorGUILayout.DropdownButton(new GUIContent(_selectedLength.ToString()), FocusType.Keyboard)) {
             GenericMenu menu = new GenericMenu();
             for (int i = 0; i < _lengthArray.Length; i++) {
@@ -64,7 +73,7 @@ public class GenerationTriangleTypeA : EditorWindow {
         EditorGUILayout.Space();
 
         // Preview
-        EditorGUILayout.LabelField("Preview");
+        DrawCommonTitle("Preview");
         if (_optionChanged) {
             if (_previewTexture == null) {
                 _previewTexture = new Texture2D(128, 128, TextureFormat.ARGB32, false);
@@ -86,12 +95,17 @@ public class GenerationTriangleTypeA : EditorWindow {
 
         GUILayout.Box(_previewTexture, GUILayout.Width(_previewTexture.width), GUILayout.Height(_previewTexture.height));
 
+        EditorGUILayout.Space();
+        EditorGUILayout.Space();
+        EditorGUILayout.Space();
+        EditorGUILayout.Space();
+
         // Output
-        if (GUILayout.Button("Generate !!")) {
+        DrawGenerationButton(() => {
             byte[] bytes = _previewTexture.EncodeToPNG();
             File.WriteAllBytes(string.Format("{0}/{1}", Utility.OUTPUT_PATH_ROOT, "NewTriangle.png"), bytes);
             AssetDatabase.Refresh();
-        }
+        });
     }
     #endregion
 

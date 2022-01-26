@@ -2,61 +2,68 @@
 using UnityEngine;
 using UnityEditor;
 
-public class GenerationGrid : EditorWindow {
+public class GenerationGrid : TextureGeneratorWindow<GenerationGrid> {
     [MenuItem("TextureGenerator/Generation/Grid")]
     public static void OpenWindow() {
         EditorWindow window = GetWindow<GenerationGrid>();
-        window.maxSize = new Vector2(500, 500);
-        window.minSize = new Vector2(200, 200);
         window.Show();
     }
 
     #region Internal Fields
+    private bool _optionChanged = false;
+    private Texture2D _previewTexture = null;
+
+    // Color
     private Color _color1 = Color.red;
     private Color _color2 = Color.green;
+
+    // Length
     private int[] _lengthOptions = new int[] { 128, 256, 512, 1024 };
     private int _selectedLength = -1;
     private int _chunkLength = 32;
-    private bool _statusChanged = false;
-
-    private GUIStyle _guiStyleTitle = null;
-    private Texture2D _previewTexture = null;
     #endregion
 
     #region Editor Window Hooks
-    public void OnGUI() {
+    protected override void OnGUIContent() {
         // Init
         if (_selectedLength == -1) {
             _selectedLength = _lengthOptions[0];
-            _guiStyleTitle = new GUIStyle() { fontStyle = FontStyle.Bold };
             _previewTexture = null;
-            _statusChanged = true;
+            _optionChanged = true;
         }
 
         EditorGUILayout.Space();
         EditorGUILayout.Space();
 
         // Color
-        EditorGUILayout.LabelField("Select Color:", _guiStyleTitle);
-        Color color1 = EditorGUILayout.ColorField("Color 1", _color1);
+        DrawCommonTitle("Select Color");
+
+        // Color - color 1
+        EditorGUILayout.BeginHorizontal();
+        EditorGUILayout.LabelField("Color 1", GUILayout.Width(70));
+        Color color1 = EditorGUILayout.ColorField(_color1);
+        EditorGUILayout.EndHorizontal();
         if (_color1 != color1) {
             _color1 = color1;
-            _statusChanged = true;
+            _optionChanged = true;
         }
 
-        Color color2 = EditorGUILayout.ColorField("Color 2", _color2);
+        // Color - color 2
+        EditorGUILayout.BeginHorizontal();
+        EditorGUILayout.LabelField("Color 2", GUILayout.Width(70));
+        Color color2 = EditorGUILayout.ColorField(_color2);
+        EditorGUILayout.EndHorizontal();
         if (_color2 != color2) {
             _color2 = color2;
-            _statusChanged = true;
+            _optionChanged = true;
         }
 
         EditorGUILayout.Space();
         EditorGUILayout.Space();
 
         // Length
-        EditorGUILayout.LabelField("Select Texture Length:", _guiStyleTitle);
-        EditorGUILayout.LabelField(string.Format("Length: {0}", _selectedLength));
-        if (EditorGUILayout.DropdownButton(new GUIContent("Choose texture length"), FocusType.Passive)) {
+        DrawCommonTitle("Select Texture Length");
+        if (EditorGUILayout.DropdownButton(new GUIContent(_selectedLength.ToString()), FocusType.Passive)) {
             GenericMenu menu = new GenericMenu();
             for (int i = 0; i < _lengthOptions.Length; i++) {
                 int lengthOption = _lengthOptions[i];
@@ -69,9 +76,9 @@ public class GenerationGrid : EditorWindow {
         EditorGUILayout.Space();
 
         // Preview
-        EditorGUILayout.LabelField("Preview", _guiStyleTitle);
-        if (_statusChanged) {
-            _statusChanged = false;
+        DrawCommonTitle("Preview");
+        if (_optionChanged) {
+            _optionChanged = false;
 
             // Set preview texture
             Texture2D tex = new Texture2D(_selectedLength, _selectedLength, TextureFormat.RGBA32, false);
@@ -92,7 +99,7 @@ public class GenerationGrid : EditorWindow {
         }
 
         if (_previewTexture != null) {
-            GUILayout.Box(_previewTexture, GUILayout.Width(200), GUILayout.Height(200));
+            GUILayout.Box(_previewTexture, GUILayout.Width(128), GUILayout.Height(128));
         }        
 
         EditorGUILayout.Space();
@@ -101,11 +108,11 @@ public class GenerationGrid : EditorWindow {
         EditorGUILayout.Space();
 
         // Output
-        if (GUILayout.Button("Generate !!")) {
+        DrawGenerationButton(() =>{
             byte[] bytes = _previewTexture.EncodeToPNG();
             File.WriteAllBytes(string.Format("{0}/{1}", Utility.OUTPUT_PATH_ROOT, "NewGrid.png"), bytes);
             AssetDatabase.Refresh();
-        }
+        });
     }
     #endregion
 
@@ -114,7 +121,7 @@ public class GenerationGrid : EditorWindow {
         int length = (int) obj;
         if (_selectedLength != length) {
             _selectedLength = length;
-            _statusChanged = true;
+            _optionChanged = true;
         }
     }
     #endregion

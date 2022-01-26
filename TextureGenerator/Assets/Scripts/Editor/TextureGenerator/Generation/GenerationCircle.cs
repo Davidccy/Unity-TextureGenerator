@@ -2,7 +2,7 @@
 using UnityEngine;
 using UnityEditor;
 
-public class GenerationCircle : EditorWindow {
+public class GenerationCircle : TextureGeneratorWindow<GenerationCircle> {
     [MenuItem("TextureGenerator/Generation/Circle")]
     public static void OpenWindow() {
         GenerationCircle window = GetWindow<GenerationCircle>();
@@ -20,7 +20,6 @@ public class GenerationCircle : EditorWindow {
     // Length
     private int _defaultLength = 128;
     private int _selectedLength = -1;
-
     private int[] _lengthArray = new int[] { 128, 256, 512, 1024 };
 
     // Center point, radius
@@ -29,23 +28,35 @@ public class GenerationCircle : EditorWindow {
     #endregion
 
     #region Editor Window Hooks
-    private void OnGUI() {
+    protected override void OnGUIContent() {
         // Init
         if (_selectedLength == -1) {
             _selectedLength = _defaultLength;
             _optionChanged = true;
         }
 
+        EditorGUILayout.Space();
+        EditorGUILayout.Space();
+
         // Color
-        EditorGUILayout.LabelField("Color");
+        DrawCommonTitle("Select Color");
+
+        // Color - color 1
+        EditorGUILayout.BeginHorizontal();
+        EditorGUILayout.LabelField("Color 1", GUILayout.Width(70));
         Color color1 = EditorGUILayout.ColorField(_color1);
-        if (color1 != _color1) {
+        EditorGUILayout.EndHorizontal();
+        if (_color1 != color1) {
             _color1 = color1;
             _optionChanged = true;
         }
 
+        // Color - color 2
+        EditorGUILayout.BeginHorizontal();
+        EditorGUILayout.LabelField("Color 2", GUILayout.Width(70));
         Color color2 = EditorGUILayout.ColorField(_color2);
-        if (color2 != _color2) {
+        EditorGUILayout.EndHorizontal();
+        if (_color2 != color2) {
             _color2 = color2;
             _optionChanged = true;
         }
@@ -53,8 +64,8 @@ public class GenerationCircle : EditorWindow {
         EditorGUILayout.Space();
         EditorGUILayout.Space();
 
-        // Size
-        EditorGUILayout.LabelField("Size");
+        // Length
+        DrawCommonTitle("Select Texture Length");
         if (EditorGUILayout.DropdownButton(new GUIContent(_selectedLength.ToString()), FocusType.Keyboard)) {
             GenericMenu menu = new GenericMenu();
             for (int i = 0; i < _lengthArray.Length; i++) {
@@ -68,14 +79,14 @@ public class GenerationCircle : EditorWindow {
         EditorGUILayout.Space();
         EditorGUILayout.Space();
 
-        // Circle settings
-        EditorGUILayout.LabelField("Circle Settings");
+        // Circle options
+        DrawCommonTitle("Circle Settings");
 
-        // Circle settings - center point
+        // Circle options - center point
         EditorGUILayout.BeginHorizontal();
         EditorGUILayout.LabelField("Center Point", GUILayout.Width(100));
-        int x = EditorGUILayout.IntSlider((int) _centerPos.x, 0, _selectedLength, GUILayout.Width(200));
-        int y = EditorGUILayout.IntSlider((int) _centerPos.y, 0, _selectedLength, GUILayout.Width(200));
+        int x = EditorGUILayout.IntSlider((int) _centerPos.x, 0, _selectedLength, GUILayout.Width(160));
+        int y = EditorGUILayout.IntSlider((int) _centerPos.y, 0, _selectedLength, GUILayout.Width(160));
         EditorGUILayout.EndHorizontal();
         x = Mathf.Clamp(x, 0, _selectedLength);
         y = Mathf.Clamp(y, 0, _selectedLength);
@@ -84,10 +95,10 @@ public class GenerationCircle : EditorWindow {
             _optionChanged = true;
         }
 
-        // Circle settings - radius
+        // Circle options - radius
         EditorGUILayout.BeginHorizontal();
         EditorGUILayout.LabelField("Radius", GUILayout.Width(100));
-        int radius = EditorGUILayout.IntSlider((int) _radius, 0, _selectedLength, GUILayout.Width(200));
+        int radius = EditorGUILayout.IntSlider((int) _radius, 0, _selectedLength, GUILayout.Width(160));
         EditorGUILayout.EndHorizontal();
         radius = Mathf.Clamp(radius, 0, _selectedLength);
         if (radius != _radius) {
@@ -99,7 +110,7 @@ public class GenerationCircle : EditorWindow {
         EditorGUILayout.Space();
 
         // Preview
-        EditorGUILayout.LabelField("Preview");
+        DrawCommonTitle("Preview");
         if (_optionChanged) {
             if (_previewTexture == null) {
                 _previewTexture = new Texture2D(_selectedLength, _selectedLength, TextureFormat.ARGB32, false);
@@ -128,11 +139,11 @@ public class GenerationCircle : EditorWindow {
         EditorGUILayout.Space();
 
         // Output
-        if (GUILayout.Button("Generate !!")) {
+        DrawGenerationButton(() => {
             byte[] bytes = _previewTexture.EncodeToPNG();
             File.WriteAllBytes(string.Format("{0}/{1}", Utility.OUTPUT_PATH_ROOT, "NewCircle.png"), bytes);
             AssetDatabase.Refresh();
-        }
+        });
     }
     #endregion
 
@@ -149,7 +160,7 @@ public class GenerationCircle : EditorWindow {
     }
 
     private bool IsPointInCircle(Vector2 point, Vector2 circleCenter, int circleRadius) {
-        return Vector2.Distance(point, circleCenter) <= circleRadius;
+        return Vector2.Distance(point, circleCenter) < circleRadius;
     }
     #endregion
 }
