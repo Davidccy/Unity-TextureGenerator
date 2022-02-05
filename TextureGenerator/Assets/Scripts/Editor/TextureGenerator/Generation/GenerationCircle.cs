@@ -140,8 +140,13 @@ public class GenerationCircle : TextureGeneratorWindow<GenerationCircle> {
 
         // Output
         DrawGenerationButton(() => {
+            string path = EditorUtility.SaveFilePanel("Save File", Utility.DEFAULT_OUTPUT_PATH, Utility.DEFAULT_FILE_NAME_CIRCLE, "png");
+            if (string.IsNullOrEmpty(path)) {
+                return;
+            }
+
             byte[] bytes = _previewTexture.EncodeToPNG();
-            File.WriteAllBytes(string.Format("{0}/{1}", Utility.OUTPUT_PATH_ROOT, "NewCircle.png"), bytes);
+            File.WriteAllBytes(path, bytes);
             AssetDatabase.Refresh();
         });
     }

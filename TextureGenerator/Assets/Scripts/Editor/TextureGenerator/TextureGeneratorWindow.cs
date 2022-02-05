@@ -4,14 +4,20 @@ using UnityEditor;
 
 public class TextureGeneratorWindow<T> : EditorWindow {
     #region Internal Fields
+    private bool _init = false;
     private bool _initStyle = false;
     private Vector2 _scrollView = Vector2.zero;
-    private GUIStyle _guiStyleTitle = new GUIStyle();
+    #endregion
+
+    #region Protected Fields
+    protected GUIStyle commonGUIStyleTitle = new GUIStyle();
+    protected GUIStyle commonGUIStyleWarningMsg = new GUIStyle();
     #endregion
 
     #region Editor Window Hooks
     private void OnGUI() {
         // Init
+        Init();
         InitStyle();
 
         // Content scrollable
@@ -22,6 +28,10 @@ public class TextureGeneratorWindow<T> : EditorWindow {
     #endregion
 
     #region Virtual Methods
+    protected virtual void OnInit() { 
+        // Do nothing
+    }
+
     protected virtual void OnGUIContent() { 
         // Do nothing
     }
@@ -29,7 +39,11 @@ public class TextureGeneratorWindow<T> : EditorWindow {
 
     #region Common Methods
     protected void DrawCommonTitle(string title) {
-        EditorGUILayout.LabelField(title, _guiStyleTitle);
+        EditorGUILayout.LabelField(title, commonGUIStyleTitle);
+    }
+
+    protected void DrawCommonWarningMsg(string msg) {
+        EditorGUILayout.LabelField(msg, commonGUIStyleWarningMsg);
     }
 
     protected void DrawGenerationButton(Action cb) {
@@ -42,15 +56,28 @@ public class TextureGeneratorWindow<T> : EditorWindow {
     #endregion
 
     #region Internal Methods
+    private void Init() {
+        if (_init) {
+            return;
+        }
+
+        _init = true;
+        OnInit();
+    }
+
     private void InitStyle() {
         if (_initStyle) {
             return;
         }
         _initStyle = true;
 
-        _guiStyleTitle = new GUIStyle();
-        _guiStyleTitle.normal.textColor = Color.white;
-        _guiStyleTitle.fontStyle = FontStyle.Bold;
+        commonGUIStyleTitle = new GUIStyle();
+        commonGUIStyleTitle.normal.textColor = Color.white;
+        commonGUIStyleTitle.fontStyle = FontStyle.Bold;
+
+        commonGUIStyleWarningMsg = new GUIStyle();
+        commonGUIStyleWarningMsg.normal.textColor = Color.red;
+        commonGUIStyleWarningMsg.fontStyle = FontStyle.Bold;
     }
     #endregion
 }

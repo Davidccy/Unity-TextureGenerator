@@ -2,7 +2,11 @@
 
 public static class Utility {
     #region Common Definitions
-    public static string OUTPUT_PATH_ROOT = "Assets/Textures/Outputs";
+    public static string DEFAULT_OUTPUT_PATH = "Assets/Textures/Outputs";
+
+    public static string DEFAULT_FILE_NAME_CIRCLE = "NewCircle";
+    public static string DEFAULT_FILE_NAME_GRID = "NewGrid";
+    public static string DEFAULT_FILE_NAME_TRIANGLE = "NewTriangle";
     #endregion
 
     #region APIs

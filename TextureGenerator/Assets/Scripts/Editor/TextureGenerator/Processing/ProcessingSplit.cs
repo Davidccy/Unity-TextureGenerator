@@ -13,6 +13,7 @@ public class ProcessingSplit : TextureGeneratorWindow<ProcessingSplit> {
     #region Internal Fields
     private bool _targetTextureChanged = false;
     private bool _splitOptionChanged = false;
+    private bool _refreshFileReview = false;
 
     private Texture2D _targetTexture = null;
     private Texture2D _textureToSplit = null;
@@ -26,9 +27,18 @@ public class ProcessingSplit : TextureGeneratorWindow<ProcessingSplit> {
     // Output order options
     private bool _orderReverseX = false;
     private bool _orderReverseY = false;
+
+    // Output file options
+    private string _outputFolderPath = string.Empty;
+    private string _outputPrefix = string.Empty;
+    private string _outputWarningMsg = string.Empty;
     #endregion
 
     #region Editor Window Hooks
+    protected override void OnInit() {
+        _outputFolderPath = Utility.DEFAULT_OUTPUT_PATH;
+    }
+
     protected override void OnGUIContent() {
         // Target texture selection
         DrawCommonTitle("Select Texture");
@@ -49,6 +59,7 @@ public class ProcessingSplit : TextureGeneratorWindow<ProcessingSplit> {
         if (_targetTexture != tex) {
             _targetTexture = tex;
             _targetTextureChanged = true;
+            _refreshFileReview = true;
         }
 
         EditorGUILayout.Space();
@@ -111,11 +122,13 @@ public class ProcessingSplit : TextureGeneratorWindow<ProcessingSplit> {
             if (splitCountX != _splitCountX) {
                 _splitCountX = splitCountX;
                 _splitOptionChanged = true;
+                _refreshFileReview = true;
             }
             int splitCountY = EditorGUILayout.IntSlider(_splitCountY, 1, 12, GUILayout.Width(200));
             if (splitCountY != _splitCountY) {
                 _splitCountY = splitCountY;
                 _splitOptionChanged = true;
+                _refreshFileReview = true;
             }
 
             EditorGUILayout.Space();
@@ -220,6 +233,86 @@ public class ProcessingSplit : TextureGeneratorWindow<ProcessingSplit> {
                 }
                 EditorGUILayout.EndHorizontal();
             }
+
+            EditorGUILayout.Space();
+            EditorGUILayout.Space();
+
+            EditorGUILayout.BeginHorizontal();
+            EditorGUILayout.LabelField("Select Output Folder", commonGUIStyleTitle, GUILayout.Width(150));
+            if (GUILayout.Button("Click to select", GUILayout.Width(100))) {
+                string outputFolder = EditorUtility.SaveFolderPanel("Select Output Folder", Utility.DEFAULT_OUTPUT_PATH, string.Empty);
+                if (!string.IsNullOrEmpty(outputFolder)) {
+                    if (outputFolder != _outputFolderPath) {
+                        _outputFolderPath = outputFolder;
+                        _refreshFileReview = true;
+                    }
+                }
+            }
+            EditorGUILayout.LabelField(string.Format("{0}", _outputFolderPath));
+            EditorGUILayout.EndHorizontal();
+
+            EditorGUILayout.BeginHorizontal();
+            EditorGUILayout.LabelField("Enter Output File Prefix", commonGUIStyleTitle, GUILayout.Width(150));
+            string outputPrefix = EditorGUILayout.DelayedTextField(_outputPrefix, GUILayout.Width(200));
+            if (outputPrefix != _outputPrefix) {
+                _outputPrefix = outputPrefix;
+                _refreshFileReview = true;
+            }
+            EditorGUILayout.EndHorizontal();
+
+            if (!string.IsNullOrEmpty(_outputPrefix) && !string.IsNullOrEmpty(_outputFolderPath)) {
+                EditorGUILayout.LabelField("File will be save as ..");
+                if (_splitCountX * _splitCountY <= 4) {
+                    for (int i = 0; i < _splitCountX * _splitCountY; i++) {
+                        EditorGUILayout.LabelField(string.Format("{0}_{1}", _outputPrefix, i));
+                    }
+                }
+                else {
+                    EditorGUILayout.LabelField(string.Format("{0}_{1}", _outputPrefix, 0));
+                    EditorGUILayout.LabelField(string.Format("{0}_{1}", _outputPrefix, 1));
+                    EditorGUILayout.LabelField(string.Format(".........."));
+                    EditorGUILayout.LabelField(string.Format("{0}_{1}", _outputPrefix, _splitCountX * _splitCountY - 1));
+                }
+
+                // Preview - Prefix and output folder checking
+                if (_refreshFileReview) {
+                    _refreshFileReview = false;
+                    _outputWarningMsg = string.Empty;
+
+                    // Check has duplicated file
+                    string[] fileNames = Directory.GetFiles(_outputFolderPath);
+                    if (fileNames != null) {
+                        for (int i = 0; i < fileNames.Length; i++) {
+                            string existedFileName = fileNames[i];
+                            for (int j = 0; j < _splitCountX * _splitCountY; j++) {
+                                string outputFileName = string.Format("{0}_{1}", _outputPrefix, j);
+                                if (existedFileName == outputFileName) {
+                                    _outputWarningMsg = "Warning, duplicated file name detected";
+                                    break;
+                                }
+                            }
+                        }
+                    }
+
+                    // Check is output folder valid
+                    if (ConvertToProjectFolderPath(_outputFolderPath, out _outputFolderPath)) {
+                        // Do nothing
+                    }
+                    else {
+                        _outputWarningMsg = "Please select project folder";
+                    }
+                }
+            }
+            else if (string.IsNullOrEmpty(_outputPrefix)) {
+                _outputWarningMsg = "Please enter file output prefix";
+            }
+            else if (string.IsNullOrEmpty(_outputFolderPath)) {
+                _outputWarningMsg = "Output folder can not be empty";
+            }
+
+            if (!string.IsNullOrEmpty(_outputWarningMsg)) {
+                DrawCommonWarningMsg(_outputWarningMsg);
+            }
         }
 
         EditorGUILayout.Space();
@@ -228,21 +321,44 @@ public class ProcessingSplit : TextureGeneratorWindow<ProcessingSplit> {
         EditorGUILayout.Space();
 
         // Output
-        DrawGenerationButton(() => {
-            for (int y = _splitCountY - 1; y >= 0; y--) {
-                for (int x = 0; x < _splitCountX; x++) {
-                    int subTextureIndex = y * _splitCountX + x;
-
-                    int columnIndex = _orderReverseX ? _splitCountX - 1 - x : x;
-                    int rowIndex = _orderReverseY ? _splitCountX - 1 - y : y;
-                    int outputIndex = rowIndex * _splitCountX + columnIndex;
-
-                    string path = string.Format("{0}/Split{1}.jpg", Utility.OUTPUT_PATH_ROOT, outputIndex);
-                    File.WriteAllBytes(path, _texture2DByteDataList[subTextureIndex]);
+        if (string.IsNullOrEmpty(_outputWarningMsg)) {
+            DrawGenerationButton(() => {
+                if (string.IsNullOrEmpty(_outputPrefix) || string.IsNullOrEmpty(_outputFolderPath)) {
+                    return;
                 }
-            }
-            AssetDatabase.Refresh();
-        });
+
+                for (int y = _splitCountY - 1; y >= 0; y--) {
+                    for (int x = 0; x < _splitCountX; x++) {
+                        int subTextureIndex = y * _splitCountX + x;
+
+                        int columnIndex = _orderReverseX ? _splitCountX - 1 - x : x;
+                        int rowIndex = _orderReverseY ? _splitCountX - 1 - y : y;
+                        int outputIndex = rowIndex * _splitCountX + columnIndex;
+
+                        string path = string.Format("{0}/{1}_{2}.png", _outputFolderPath, _outputPrefix, outputIndex);
+                        File.WriteAllBytes(path, _texture2DByteDataList[subTextureIndex]);
+                    }
+                }
+                AssetDatabase.Refresh();
+            });
+        }        
+    }
+    #endregion
+
+    #region Internal Methods
+    private bool ConvertToProjectFolderPath(string oriFolderPath, out string folderPath) {
+        folderPath = string.Empty;
+        if (oriFolderPath.IndexOf(Application.dataPath) == 0) {
+            folderPath = oriFolderPath.Replace(Application.dataPath, "Assets");
+            return true;
+        }
+
+        if (oriFolderPath.IndexOf("Assets") == 0) {
+            folderPath = oriFolderPath;
+            return true;
+        }
+
+        return false;
     }
     #endregion
 }

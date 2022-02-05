@@ -108,9 +108,14 @@ public class GenerationGrid : TextureGeneratorWindow<GenerationGrid> {
         EditorGUILayout.Space();
 
         // Output
-        DrawGenerationButton(() =>{
+        DrawGenerationButton(() => {
+            string path = EditorUtility.SaveFilePanel("Save File", Utility.DEFAULT_OUTPUT_PATH, Utility.DEFAULT_FILE_NAME_GRID, "png");
+            if (string.IsNullOrEmpty(path)) {
+                return;
+            }
+
             byte[] bytes = _previewTexture.EncodeToPNG();
-            File.WriteAllBytes(string.Format("{0}/{1}", Utility.OUTPUT_PATH_ROOT, "NewGrid.png"), bytes);
+            File.WriteAllBytes(path, bytes);
             AssetDatabase.Refresh();
         });
     }
