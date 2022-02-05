@@ -339,7 +339,8 @@ public class ProcessingSplit : TextureGeneratorWindow<ProcessingSplit> {
                         File.WriteAllBytes(path, _texture2DByteDataList[subTextureIndex]);
                     }
                 }
-                AssetDatabase.Refresh();
+
+                OnGenerationCompleted();
             });
         }        
     }

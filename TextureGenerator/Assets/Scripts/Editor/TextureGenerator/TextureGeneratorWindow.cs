@@ -35,6 +35,11 @@ public class TextureGeneratorWindow<T> : EditorWindow {
     protected virtual void OnGUIContent() { 
         // Do nothing
     }
+
+    protected virtual void OnGenerationCompleted() {
+        ShowNotificationWindow("Generation Completed");
+        AssetDatabase.Refresh();
+    }
     #endregion
 
     #region Common Methods
@@ -52,6 +57,10 @@ public class TextureGeneratorWindow<T> : EditorWindow {
                 cb();
             }
         }
+    }
+
+    protected void ShowNotificationWindow(string msg) {
+        ShowNotification(new GUIContent(msg), 3.0f);
     }
     #endregion
 

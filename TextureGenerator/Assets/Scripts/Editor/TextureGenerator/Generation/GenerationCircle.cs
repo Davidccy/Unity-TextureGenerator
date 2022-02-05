@@ -147,7 +147,8 @@ public class GenerationCircle : TextureGeneratorWindow<GenerationCircle> {
 
             byte[] bytes = _previewTexture.EncodeToPNG();
             File.WriteAllBytes(path, bytes);
-            AssetDatabase.Refresh();
+
+            OnGenerationCompleted();
         });
     }
     #endregion

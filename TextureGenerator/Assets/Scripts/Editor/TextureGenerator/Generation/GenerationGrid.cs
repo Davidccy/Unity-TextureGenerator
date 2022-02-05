@@ -116,7 +116,8 @@ public class GenerationGrid : TextureGeneratorWindow<GenerationGrid> {
 
             byte[] bytes = _previewTexture.EncodeToPNG();
             File.WriteAllBytes(path, bytes);
-            AssetDatabase.Refresh();
+
+            OnGenerationCompleted();
         });
     }
     #endregion

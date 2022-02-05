@@ -109,7 +109,8 @@ public class GenerationTriangleTypeA : TextureGeneratorWindow<GenerationTriangle
 
             byte[] bytes = _previewTexture.EncodeToPNG();
             File.WriteAllBytes(path, bytes);
-            AssetDatabase.Refresh();
+
+            OnGenerationCompleted();
         });
     }
     #endregion
