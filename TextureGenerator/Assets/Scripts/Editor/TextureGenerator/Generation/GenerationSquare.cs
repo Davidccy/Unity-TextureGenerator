@@ -2,10 +2,10 @@
 using UnityEngine;
 using UnityEditor;
 
-public class GenerationTriangleTypeB : TextureGeneratorWindow<GenerationTriangleTypeB> {
-    [MenuItem("TextureGenerator/Generation/TriangleTypeB")]
+public class GenerationSquare : TextureGeneratorWindow<GenerationSquare> {
+    [MenuItem("TextureGenerator/Generation/Square")]
     public static void OpenWindow() {
-        GenerationTriangleTypeB window = GetWindow<GenerationTriangleTypeB>();
+        GenerationSquare window = GetWindow<GenerationSquare>();
         window.Show();
     }
 
@@ -20,13 +20,12 @@ public class GenerationTriangleTypeB : TextureGeneratorWindow<GenerationTriangle
     // Length
     private int _defaultLength = 128;
     private int _selectedLength = -1;
-
     private int[] _lengthArray = new int[] { 128, 256, 512, 1024 };
 
-    // Point
-    private Vector2 _point1Pos = Vector2.zero;
-    private Vector2 _point2Pos = Vector2.zero;
-    private Vector2 _point3Pos = Vector2.zero;
+    // Center point, side length
+    private Vector2 _centerPos = Vector2.zero;
+    private int _width = 0;
+    private int _height = 0;
     #endregion
 
     #region Override Methods
@@ -65,7 +64,7 @@ public class GenerationTriangleTypeB : TextureGeneratorWindow<GenerationTriangle
         EditorGUILayout.Space();
         EditorGUILayout.Space();
 
-        // Size
+        // Length
         DrawCommonTitle("Select Texture Length");
         if (EditorGUILayout.DropdownButton(new GUIContent(_selectedLength.ToString()), FocusType.Keyboard)) {
             GenericMenu menu = new GenericMenu();
@@ -80,47 +79,41 @@ public class GenerationTriangleTypeB : TextureGeneratorWindow<GenerationTriangle
         EditorGUILayout.Space();
         EditorGUILayout.Space();
 
-        // Points
-        DrawCommonTitle("Point Options");
+        // Square options
+        DrawCommonTitle("Square Settings");
 
-        // Points - point 1
+        // Square options - center point
         EditorGUILayout.BeginHorizontal();
-        EditorGUILayout.LabelField("Point 1", GUILayout.Width(100));
-        int x = EditorGUILayout.IntSlider((int) _point1Pos.x, 0, _selectedLength, GUILayout.Width(200));
-        int y = EditorGUILayout.IntSlider((int) _point1Pos.y, 0, _selectedLength, GUILayout.Width(200));
+        EditorGUILayout.LabelField("Center Point", GUILayout.Width(100));
+        int x = EditorGUILayout.IntSlider((int) _centerPos.x, 0, _selectedLength, GUILayout.Width(160));
+        int y = EditorGUILayout.IntSlider((int) _centerPos.y, 0, _selectedLength, GUILayout.Width(160));
         EditorGUILayout.EndHorizontal();
         x = Mathf.Clamp(x, 0, _selectedLength);
         y = Mathf.Clamp(y, 0, _selectedLength);
-        if (x != _point1Pos.x || y != _point1Pos.y) {
-            _point1Pos = new Vector2(x, y);
+        if (x != _centerPos.x || y != _centerPos.y) {
+            _centerPos = new Vector2(x, y);
             _optionChanged = true;
         }
 
-        // Points - point 2
+        // Square options - width
         EditorGUILayout.BeginHorizontal();
-        EditorGUILayout.LabelField("Point 2", GUILayout.Width(100));
-        x = EditorGUILayout.IntSlider((int) _point2Pos.x, 0, _selectedLength, GUILayout.Width(200));
-        y = EditorGUILayout.IntSlider((int) _point2Pos.y, 0, _selectedLength, GUILayout.Width(200));
+        EditorGUILayout.LabelField("Width", GUILayout.Width(100));
+        int width = EditorGUILayout.IntSlider((int) _width, 0, _selectedLength, GUILayout.Width(160));
         EditorGUILayout.EndHorizontal();
-        x = Mathf.Clamp(x, 0, _selectedLength);
-        y = Mathf.Clamp(y, 0, _selectedLength);
-        if (x != _point2Pos.x || y != _point2Pos.y) {
-            _point2Pos = new Vector2(x, y);
+        width = Mathf.Clamp(width, 0, _selectedLength);
+        if (width != _width) {
+            _width = width;
             _optionChanged = true;
         }
 
-        // Points - point 3
+        // Square options - height
         EditorGUILayout.BeginHorizontal();
-        EditorGUILayout.LabelField("Point 3", GUILayout.Width(100));
-        x = EditorGUILayout.IntSlider((int) _point3Pos.x, 0, _selectedLength, GUILayout.Width(200));
-        y = EditorGUILayout.IntSlider((int) _point3Pos.y, 0, _selectedLength, GUILayout.Width(200));
-        //x = EditorGUILayout.DelayedIntField((int) _point3Pos.x, GUILayout.Width(50));
-        //y = EditorGUILayout.DelayedIntField((int) _point3Pos.y, GUILayout.Width(50));
+        EditorGUILayout.LabelField("Height", GUILayout.Width(100));
+        int height = EditorGUILayout.IntSlider((int) _height, 0, _selectedLength, GUILayout.Width(160));
         EditorGUILayout.EndHorizontal();
-        x = Mathf.Clamp(x, 0, _selectedLength);
-        y = Mathf.Clamp(y, 0, _selectedLength);
-        if (x != _point3Pos.x || y != _point3Pos.y) {
-            _point3Pos = new Vector2(x, y);
+        height = Mathf.Clamp(height, 0, _selectedLength);
+        if (height != _height) {
+            _height = height;
             _optionChanged = true;
         }
 
@@ -140,7 +133,7 @@ public class GenerationTriangleTypeB : TextureGeneratorWindow<GenerationTriangle
             for (int w = 0; w < _selectedLength; w++) {
                 for (int h = 0; h < _selectedLength; h++) {
                     Vector2 point = new Vector2(w, h);
-                    Color c = IsPointInTriangle(point, _point1Pos, _point2Pos, _point3Pos) ? _color1 : _color2;
+                    Color c = IsPointInSquare(point, _centerPos, _width, _height) ? _color1 : _color2;
                     newTex.SetPixel(w, h, c);
                 }
             }
@@ -158,7 +151,7 @@ public class GenerationTriangleTypeB : TextureGeneratorWindow<GenerationTriangle
 
         // Output
         DrawGenerationButton(() => {
-            string path = EditorUtility.SaveFilePanel("Save File", Utility.DEFAULT_OUTPUT_PATH, Utility.DEFAULT_FILE_NAME_TRIANGLE, "png");
+            string path = EditorUtility.SaveFilePanel("Save File", Utility.DEFAULT_OUTPUT_PATH, Utility.DEFAULT_FILE_NAME_SQUARE, "png");
             if (string.IsNullOrEmpty(path)) {
                 return;
             }
@@ -183,44 +176,8 @@ public class GenerationTriangleTypeB : TextureGeneratorWindow<GenerationTriangle
         _optionChanged = true;
     }
 
-    // Type A
-    // https://stackoverflow.com/questions/2049582/how-to-determine-if-a-point-is-in-a-2d-triangle
-    private bool IsPointInTriangle(Vector2 point, Vector2 triP1, Vector2 triP2, Vector2 triP3) {
-        float d1 = Sign(point, triP1, triP2);
-        float d2 = Sign(point, triP2, triP3);
-        float d3 = Sign(point, triP3, triP1);
-
-        bool hasNegative = (d1 < 0) || (d2 < 0) || (d3 < 0);
-        bool hasPositive = (d1 > 0) || (d2 > 0) || (d3 > 0);
-
-        return !(hasNegative && hasPositive);
+    private bool IsPointInSquare(Vector2 point, Vector2 squareCenter, int squareWidth, int squareHeight) {
+        return Mathf.Abs(point.x - squareCenter.x) <= squareWidth && Mathf.Abs(point.y - squareCenter.y) <= squareHeight;
     }
-
-    private float Sign(Vector2 p1, Vector2 p2, Vector2 p3) {
-        return (p1.x - p3.x) * (p2.y - p3.y) - (p2.x - p3.x) * (p1.y - p3.y);
-    }
-
-    // Type B
-    // https://www.gamedev.net/forums/topic.asp?topic_id=295943
-    // But this method not works
-    //
-    //private bool IsPointInTriangle(Vector2 point, Vector2 triP1, Vector2 triP2, Vector2 triP3) {
-    //    float totalArea = TriangleArea(triP1, triP2, triP3);
-    //    float area1 = TriangleArea(point, triP2, triP3);
-    //    float area2 = TriangleArea(point, triP1, triP3);
-    //    float area3 = TriangleArea(point, triP1, triP2);
-
-    //    if ((area1 + area2 + area3) > totalArea) {
-    //        return false;
-    //    }
-
-    //    return true;
-    //}
-
-    //private float TriangleArea(Vector2 p1, Vector2 p2, Vector2 p3) {
-    //    float area = 0.0f;
-    //    area = (p1.x - p3.x) * (p2.y - p3.y) - (p2.x - p3.x) * (p1.y - p3.y);
-    //    return area / 2.0f;
-    //}
     #endregion
 }

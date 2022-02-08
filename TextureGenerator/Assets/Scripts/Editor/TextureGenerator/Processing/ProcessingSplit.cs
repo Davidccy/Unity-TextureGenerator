@@ -40,6 +40,9 @@ public class ProcessingSplit : TextureGeneratorWindow<ProcessingSplit> {
     }
 
     protected override void OnGUIContent() {
+        EditorGUILayout.Space();
+        EditorGUILayout.Space();
+
         // Target texture selection
         DrawCommonTitle("Select Texture");
 

@@ -23,15 +23,14 @@ public class GenerationGrid : TextureGeneratorWindow<GenerationGrid> {
     private int _chunkLength = 32;
     #endregion
 
-    #region Editor Window Hooks
-    protected override void OnGUIContent() {
-        // Init
-        if (_selectedLength == -1) {
-            _selectedLength = _lengthOptions[0];
-            _previewTexture = null;
-            _optionChanged = true;
-        }
+    #region Override Methods
+    protected override void OnInit() {
+        _selectedLength = _lengthOptions[0];
+        _previewTexture = null;
+        _optionChanged = true;
+    }
 
+    protected override void OnGUIContent() {
         EditorGUILayout.Space();
         EditorGUILayout.Space();
 
