@@ -2,10 +2,10 @@
 using UnityEngine;
 using UnityEditor;
 
-public class GenerationSquare : TextureGeneratorWindow<GenerationSquare> {
-    [MenuItem("TextureGenerator/Generation/Square")]
+public class GenerationSquareGradient : TextureGeneratorWindow<GenerationSquareGradient> {
+    [MenuItem("TextureGenerator/Generation/Square - Gradient")]
     public static void OpenWindow() {
-        GenerationSquare window = GetWindow<GenerationSquare>();
+        GenerationSquareGradient window = GetWindow<GenerationSquareGradient>();
         window.Show();
     }
 
@@ -14,7 +14,8 @@ public class GenerationSquare : TextureGeneratorWindow<GenerationSquare> {
     private Texture2D _previewTexture = null;
 
     // Color
-    private Color _colorSquare = Color.red;
+    private Gradient _colorGradient = new Gradient();
+    private Gradient _colorGradientTemp = new Gradient();
     private Color _colorBackground = Color.green;
 
     // Length
@@ -41,13 +42,13 @@ public class GenerationSquare : TextureGeneratorWindow<GenerationSquare> {
         // Color
         DrawCommonTitle("Select Color");
 
-        // Color - color square
+        // Color - color square gradient
         EditorGUILayout.BeginHorizontal();
         EditorGUILayout.LabelField("Square", GUILayout.Width(100));
-        Color colorSquare = EditorGUILayout.ColorField(_colorSquare);
+        Gradient colorGradientTemp = EditorGUILayout.GradientField(_colorGradientTemp);
         EditorGUILayout.EndHorizontal();
-        if (_colorSquare != colorSquare) {
-            _colorSquare = colorSquare;
+        if (!_colorGradient.Equals(colorGradientTemp)) {
+            _colorGradient.SetKeys(colorGradientTemp.colorKeys, colorGradientTemp.alphaKeys);
             _optionChanged = true;
         }
 
@@ -133,7 +134,7 @@ public class GenerationSquare : TextureGeneratorWindow<GenerationSquare> {
             for (int w = 0; w < _selectedLength; w++) {
                 for (int h = 0; h < _selectedLength; h++) {
                     Vector2 point = new Vector2(w, h);
-                    Color c = IsPointInSquare(point, _centerPos, _width, _height) ? _colorSquare : _colorBackground;
+                    Color c = IsPointInSquare(point, _centerPos, _width, _height) ? GetGradientColor(point, _centerPos, _width, _height) : _colorBackground;
                     newTex.SetPixel(w, h, c);
                 }
             }
@@ -178,6 +179,22 @@ public class GenerationSquare : TextureGeneratorWindow<GenerationSquare> {
 
     private bool IsPointInSquare(Vector2 point, Vector2 squareCenter, int squareWidth, int squareHeight) {
         return Mathf.Abs(point.x - squareCenter.x) <= squareWidth / 2.0f && Mathf.Abs(point.y - squareCenter.y) <= squareHeight / 2.0f;
+    }
+
+    private Color GetGradientColor(Vector2 point, Vector2 squareCenter, int squareWidth, int squareHeight) {
+        float minSquarePosX = squareCenter.x - squareWidth / 2.0f;
+        float maxSquarePosX = squareCenter.x + squareWidth / 2.0f;
+        float minPointToSideX = Mathf.Min(Mathf.Abs(point.x - minSquarePosX), Mathf.Abs(point.x - maxSquarePosX));
+
+        float minSquarePosY = squareCenter.y - squareHeight / 2.0f;
+        float maxSquarePosY = squareCenter.y + squareHeight / 2.0f;
+        float minPointToSideY = Mathf.Min(Mathf.Abs(point.y - minSquarePosY), Mathf.Abs(point.y - maxSquarePosY));
+
+        float minPointToSide = Mathf.Min(minPointToSideX, minPointToSideY);
+        float minCenterToSide = Mathf.Min(squareWidth / 2.0f, squareHeight / 2.0f);
+
+        float t = minCenterToSide != 0 ? minPointToSide / minCenterToSide : 0;
+        return _colorGradient.Evaluate(t);
     }
     #endregion
 }

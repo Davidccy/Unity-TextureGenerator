@@ -2,10 +2,10 @@
 using UnityEngine;
 using UnityEditor;
 
-public class GenerationSquare : TextureGeneratorWindow<GenerationSquare> {
-    [MenuItem("TextureGenerator/Generation/Square")]
+public class GenerationCircleGradient : TextureGeneratorWindow<GenerationCircleGradient> {
+    [MenuItem("TextureGenerator/Generation/Circle - Gradient")]
     public static void OpenWindow() {
-        GenerationSquare window = GetWindow<GenerationSquare>();
+        GenerationCircleGradient window = GetWindow<GenerationCircleGradient>();
         window.Show();
     }
 
@@ -14,18 +14,18 @@ public class GenerationSquare : TextureGeneratorWindow<GenerationSquare> {
     private Texture2D _previewTexture = null;
 
     // Color
-    private Color _colorSquare = Color.red;
-    private Color _colorBackground = Color.green;
+    private Gradient _colorGradient = new Gradient();
+    private Gradient _colorGradientTemp = new Gradient();
+    private Color _colorBG = Color.green;
 
     // Length
     private int _defaultLength = 128;
     private int _selectedLength = -1;
     private int[] _lengthArray = new int[] { 128, 256, 512, 1024 };
 
-    // Center point, side length
+    // Center point, radius
     private Vector2 _centerPos = Vector2.zero;
-    private int _width = 0;
-    private int _height = 0;
+    private int _radius = 0;
     #endregion
 
     #region Override Methods
@@ -41,23 +41,23 @@ public class GenerationSquare : TextureGeneratorWindow<GenerationSquare> {
         // Color
         DrawCommonTitle("Select Color");
 
-        // Color - color square
+        // Color - color circle gradient
         EditorGUILayout.BeginHorizontal();
-        EditorGUILayout.LabelField("Square", GUILayout.Width(100));
-        Color colorSquare = EditorGUILayout.ColorField(_colorSquare);
+        EditorGUILayout.LabelField("Circle", GUILayout.Width(100));
+        Gradient colorGradientTemp = EditorGUILayout.GradientField(_colorGradientTemp);
         EditorGUILayout.EndHorizontal();
-        if (_colorSquare != colorSquare) {
-            _colorSquare = colorSquare;
+        if (!_colorGradient.Equals(colorGradientTemp)) {
+            _colorGradient.SetKeys(colorGradientTemp.colorKeys, colorGradientTemp.alphaKeys);
             _optionChanged = true;
         }
 
         // Color - color background
         EditorGUILayout.BeginHorizontal();
         EditorGUILayout.LabelField("Background", GUILayout.Width(100));
-        Color colorBG = EditorGUILayout.ColorField(_colorBackground);
+        Color colorBG = EditorGUILayout.ColorField(_colorBG);
         EditorGUILayout.EndHorizontal();
-        if (_colorBackground != colorBG) {
-            _colorBackground = colorBG;
+        if (_colorBG != colorBG) {
+            _colorBG = colorBG;
             _optionChanged = true;
         }
 
@@ -79,10 +79,10 @@ public class GenerationSquare : TextureGeneratorWindow<GenerationSquare> {
         EditorGUILayout.Space();
         EditorGUILayout.Space();
 
-        // Square options
-        DrawCommonTitle("Square Settings");
+        // Circle options
+        DrawCommonTitle("Circle Settings");
 
-        // Square options - center point
+        // Circle options - center point
         EditorGUILayout.BeginHorizontal();
         EditorGUILayout.LabelField("Center Point", GUILayout.Width(100));
         int x = EditorGUILayout.IntSlider((int) _centerPos.x, 0, _selectedLength, GUILayout.Width(160));
@@ -95,25 +95,14 @@ public class GenerationSquare : TextureGeneratorWindow<GenerationSquare> {
             _optionChanged = true;
         }
 
-        // Square options - width
+        // Circle options - radius
         EditorGUILayout.BeginHorizontal();
-        EditorGUILayout.LabelField("Width", GUILayout.Width(100));
-        int width = EditorGUILayout.IntSlider((int) _width, 0, _selectedLength, GUILayout.Width(160));
+        EditorGUILayout.LabelField("Radius", GUILayout.Width(100));
+        int radius = EditorGUILayout.IntSlider((int) _radius, 0, _selectedLength, GUILayout.Width(160));
         EditorGUILayout.EndHorizontal();
-        width = Mathf.Clamp(width, 0, _selectedLength);
-        if (width != _width) {
-            _width = width;
-            _optionChanged = true;
-        }
-
-        // Square options - height
-        EditorGUILayout.BeginHorizontal();
-        EditorGUILayout.LabelField("Height", GUILayout.Width(100));
-        int height = EditorGUILayout.IntSlider((int) _height, 0, _selectedLength, GUILayout.Width(160));
-        EditorGUILayout.EndHorizontal();
-        height = Mathf.Clamp(height, 0, _selectedLength);
-        if (height != _height) {
-            _height = height;
+        radius = Mathf.Clamp(radius, 0, _selectedLength);
+        if (radius != _radius) {
+            _radius = radius;
             _optionChanged = true;
         }
 
@@ -133,7 +122,7 @@ public class GenerationSquare : TextureGeneratorWindow<GenerationSquare> {
             for (int w = 0; w < _selectedLength; w++) {
                 for (int h = 0; h < _selectedLength; h++) {
                     Vector2 point = new Vector2(w, h);
-                    Color c = IsPointInSquare(point, _centerPos, _width, _height) ? _colorSquare : _colorBackground;
+                    Color c = IsPointInCircle(point, _centerPos, _radius) ? GetGradientColor(point, _centerPos, _radius) : _colorBG;
                     newTex.SetPixel(w, h, c);
                 }
             }
@@ -151,7 +140,7 @@ public class GenerationSquare : TextureGeneratorWindow<GenerationSquare> {
 
         // Output
         DrawGenerationButton(() => {
-            string path = EditorUtility.SaveFilePanel("Save File", Utility.DEFAULT_OUTPUT_PATH, Utility.DEFAULT_FILE_NAME_SQUARE, "png");
+            string path = EditorUtility.SaveFilePanel("Save File", Utility.DEFAULT_OUTPUT_PATH, Utility.DEFAULT_FILE_NAME_CIRCLE, "png");
             if (string.IsNullOrEmpty(path)) {
                 return;
             }
@@ -176,8 +165,14 @@ public class GenerationSquare : TextureGeneratorWindow<GenerationSquare> {
         _optionChanged = true;
     }
 
-    private bool IsPointInSquare(Vector2 point, Vector2 squareCenter, int squareWidth, int squareHeight) {
-        return Mathf.Abs(point.x - squareCenter.x) <= squareWidth / 2.0f && Mathf.Abs(point.y - squareCenter.y) <= squareHeight / 2.0f;
+    private bool IsPointInCircle(Vector2 point, Vector2 circleCenter, int circleRadius) {
+        return Vector2.Distance(point, circleCenter) < circleRadius;
+    }
+
+    private Color GetGradientColor(Vector2 point, Vector2 circleCenter, int circleRadius) {
+        float distance = Vector2.Distance(point, circleCenter);
+        float t = circleRadius != 0 ? distance / circleRadius : 0;
+        return _colorGradient.Evaluate(t);
     }
     #endregion
 }
