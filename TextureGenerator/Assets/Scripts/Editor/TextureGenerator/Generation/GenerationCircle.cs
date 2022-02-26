@@ -84,8 +84,8 @@ public class GenerationCircle : TextureGeneratorWindow<GenerationCircle> {
         // Circle options - center point
         EditorGUILayout.BeginHorizontal();
         EditorGUILayout.LabelField("Center Point", GUILayout.Width(100));
-        int x = EditorGUILayout.IntSlider((int) _centerPos.x, 0, _selectedLength, GUILayout.Width(160));
-        int y = EditorGUILayout.IntSlider((int) _centerPos.y, 0, _selectedLength, GUILayout.Width(160));
+        int x = EditorGUILayout.IntSlider((int) _centerPos.x, 0, _selectedLength, GUILayout.Width(200));
+        int y = EditorGUILayout.IntSlider((int) _centerPos.y, 0, _selectedLength, GUILayout.Width(200));
         EditorGUILayout.EndHorizontal();
         x = Mathf.Clamp(x, 0, _selectedLength);
         y = Mathf.Clamp(y, 0, _selectedLength);
@@ -97,7 +97,7 @@ public class GenerationCircle : TextureGeneratorWindow<GenerationCircle> {
         // Circle options - radius
         EditorGUILayout.BeginHorizontal();
         EditorGUILayout.LabelField("Radius", GUILayout.Width(100));
-        int radius = EditorGUILayout.IntSlider((int) _radius, 0, _selectedLength, GUILayout.Width(160));
+        int radius = EditorGUILayout.IntSlider((int) _radius, 0, _selectedLength, GUILayout.Width(200));
         EditorGUILayout.EndHorizontal();
         radius = Mathf.Clamp(radius, 0, _selectedLength);
         if (radius != _radius) {

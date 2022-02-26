@@ -38,7 +38,7 @@ public class GenerationTriangleTypeA : TextureGeneratorWindow<GenerationTriangle
 
         // Color - color triangle
         EditorGUILayout.BeginHorizontal();
-        EditorGUILayout.LabelField("Square", GUILayout.Width(100));
+        EditorGUILayout.LabelField("Triangle", GUILayout.Width(100));
         Color colorTriangle = EditorGUILayout.ColorField(_colorTriangle);
         EditorGUILayout.EndHorizontal();
         if (_colorTriangle != colorTriangle) {

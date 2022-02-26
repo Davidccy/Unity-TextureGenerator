@@ -86,8 +86,8 @@ public class GenerationRectangleGradient : TextureGeneratorWindow<GenerationRect
         // Rectangle options - center point
         EditorGUILayout.BeginHorizontal();
         EditorGUILayout.LabelField("Center Point", GUILayout.Width(100));
-        int x = EditorGUILayout.IntSlider((int) _centerPos.x, 0, _selectedLength, GUILayout.Width(160));
-        int y = EditorGUILayout.IntSlider((int) _centerPos.y, 0, _selectedLength, GUILayout.Width(160));
+        int x = EditorGUILayout.IntSlider((int) _centerPos.x, 0, _selectedLength, GUILayout.Width(200));
+        int y = EditorGUILayout.IntSlider((int) _centerPos.y, 0, _selectedLength, GUILayout.Width(200));
         EditorGUILayout.EndHorizontal();
         x = Mathf.Clamp(x, 0, _selectedLength);
         y = Mathf.Clamp(y, 0, _selectedLength);
@@ -99,7 +99,7 @@ public class GenerationRectangleGradient : TextureGeneratorWindow<GenerationRect
         // Rectangle options - width
         EditorGUILayout.BeginHorizontal();
         EditorGUILayout.LabelField("Width", GUILayout.Width(100));
-        int width = EditorGUILayout.IntSlider((int) _width, 0, _selectedLength, GUILayout.Width(160));
+        int width = EditorGUILayout.IntSlider((int) _width, 0, _selectedLength, GUILayout.Width(200));
         EditorGUILayout.EndHorizontal();
         width = Mathf.Clamp(width, 0, _selectedLength);
         if (width != _width) {
@@ -110,7 +110,7 @@ public class GenerationRectangleGradient : TextureGeneratorWindow<GenerationRect
         // Rectangle options - height
         EditorGUILayout.BeginHorizontal();
         EditorGUILayout.LabelField("Height", GUILayout.Width(100));
-        int height = EditorGUILayout.IntSlider((int) _height, 0, _selectedLength, GUILayout.Width(160));
+        int height = EditorGUILayout.IntSlider((int) _height, 0, _selectedLength, GUILayout.Width(200));
         EditorGUILayout.EndHorizontal();
         height = Mathf.Clamp(height, 0, _selectedLength);
         if (height != _height) {
