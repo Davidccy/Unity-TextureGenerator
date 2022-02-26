@@ -6,7 +6,7 @@ public static class Utility {
 
     public static string DEFAULT_FILE_NAME_CIRCLE = "NewCircle";
     public static string DEFAULT_FILE_NAME_GRID = "NewGrid";
-    public static string DEFAULT_FILE_NAME_SQUARE = "NewSquare";
+    public static string DEFAULT_FILE_NAME_RECTANGLE = "NewRectangle";
     public static string DEFAULT_FILE_NAME_TRIANGLE = "NewTriangle";
     #endregion
 
