@@ -14,8 +14,8 @@ public class GenerationCircle : TextureGeneratorWindow<GenerationCircle> {
     private Texture2D _previewTexture = null;
 
     // Color
-    private Color _color1 = Color.red;
-    private Color _color2 = Color.green;
+    private Color _colorCircle = Color.red;
+    private Color _colorBG = Color.green;
 
     // Length
     private int _defaultLength = 128;
@@ -40,23 +40,23 @@ public class GenerationCircle : TextureGeneratorWindow<GenerationCircle> {
         // Color
         DrawCommonTitle("Select Color");
 
-        // Color - color 1
+        // Color - color circle
         EditorGUILayout.BeginHorizontal();
-        EditorGUILayout.LabelField("Color 1", GUILayout.Width(70));
-        Color color1 = EditorGUILayout.ColorField(_color1);
+        EditorGUILayout.LabelField("Circle", GUILayout.Width(100));
+        Color colorCircle = EditorGUILayout.ColorField(_colorCircle);
         EditorGUILayout.EndHorizontal();
-        if (_color1 != color1) {
-            _color1 = color1;
+        if (_colorCircle != colorCircle) {
+            _colorCircle = colorCircle;
             _optionChanged = true;
         }
 
-        // Color - color 2
+        // Color - color background
         EditorGUILayout.BeginHorizontal();
-        EditorGUILayout.LabelField("Color 2", GUILayout.Width(70));
-        Color color2 = EditorGUILayout.ColorField(_color2);
+        EditorGUILayout.LabelField("Background", GUILayout.Width(100));
+        Color colorBG = EditorGUILayout.ColorField(_colorBG);
         EditorGUILayout.EndHorizontal();
-        if (_color2 != color2) {
-            _color2 = color2;
+        if (_colorBG != colorBG) {
+            _colorBG = colorBG;
             _optionChanged = true;
         }
 
@@ -121,7 +121,7 @@ public class GenerationCircle : TextureGeneratorWindow<GenerationCircle> {
             for (int w = 0; w < _selectedLength; w++) {
                 for (int h = 0; h < _selectedLength; h++) {
                     Vector2 point = new Vector2(w, h);
-                    Color c = IsPointInCircle(point, _centerPos, _radius) ? _color1 : _color2;
+                    Color c = IsPointInCircle(point, _centerPos, _radius) ? _colorCircle : _colorBG;
                     newTex.SetPixel(w, h, c);
                 }
             }

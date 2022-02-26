@@ -14,8 +14,8 @@ public class GenerationSquare : TextureGeneratorWindow<GenerationSquare> {
     private Texture2D _previewTexture = null;
 
     // Color
-    private Color _color1 = Color.red;
-    private Color _color2 = Color.green;
+    private Color _colorSquare = Color.red;
+    private Color _colorBackground = Color.green;
 
     // Length
     private int _defaultLength = 128;
@@ -41,23 +41,23 @@ public class GenerationSquare : TextureGeneratorWindow<GenerationSquare> {
         // Color
         DrawCommonTitle("Select Color");
 
-        // Color - color 1
+        // Color - color square
         EditorGUILayout.BeginHorizontal();
-        EditorGUILayout.LabelField("Color 1", GUILayout.Width(70));
-        Color color1 = EditorGUILayout.ColorField(_color1);
+        EditorGUILayout.LabelField("Square", GUILayout.Width(100));
+        Color colorSquare = EditorGUILayout.ColorField(_colorSquare);
         EditorGUILayout.EndHorizontal();
-        if (_color1 != color1) {
-            _color1 = color1;
+        if (_colorSquare != colorSquare) {
+            _colorSquare = colorSquare;
             _optionChanged = true;
         }
 
-        // Color - color 2
+        // Color - color background
         EditorGUILayout.BeginHorizontal();
-        EditorGUILayout.LabelField("Color 2", GUILayout.Width(70));
-        Color color2 = EditorGUILayout.ColorField(_color2);
+        EditorGUILayout.LabelField("Background", GUILayout.Width(100));
+        Color colorBG = EditorGUILayout.ColorField(_colorBackground);
         EditorGUILayout.EndHorizontal();
-        if (_color2 != color2) {
-            _color2 = color2;
+        if (_colorBackground != colorBG) {
+            _colorBackground = colorBG;
             _optionChanged = true;
         }
 
@@ -133,7 +133,7 @@ public class GenerationSquare : TextureGeneratorWindow<GenerationSquare> {
             for (int w = 0; w < _selectedLength; w++) {
                 for (int h = 0; h < _selectedLength; h++) {
                     Vector2 point = new Vector2(w, h);
-                    Color c = IsPointInSquare(point, _centerPos, _width, _height) ? _color1 : _color2;
+                    Color c = IsPointInSquare(point, _centerPos, _width, _height) ? _colorSquare : _colorBackground;
                     newTex.SetPixel(w, h, c);
                 }
             }

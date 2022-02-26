@@ -14,8 +14,8 @@ public class GenerationTriangleTypeA : TextureGeneratorWindow<GenerationTriangle
     private Texture2D _previewTexture = null;
 
     // Color
-    private Color _color1 = Color.red;
-    private Color _color2 = Color.green;
+    private Color _colorTriangle = Color.red;
+    private Color _colorBG = Color.green;
 
     // Length
     private int _defaultLength = 128;
@@ -36,23 +36,23 @@ public class GenerationTriangleTypeA : TextureGeneratorWindow<GenerationTriangle
         // Color
         DrawCommonTitle("Select Color");
 
-        // Color - color 1
+        // Color - color triangle
         EditorGUILayout.BeginHorizontal();
-        EditorGUILayout.LabelField("Color 1", GUILayout.Width(70));
-        Color color1 = EditorGUILayout.ColorField(_color1);
+        EditorGUILayout.LabelField("Square", GUILayout.Width(100));
+        Color colorTriangle = EditorGUILayout.ColorField(_colorTriangle);
         EditorGUILayout.EndHorizontal();
-        if (_color1 != color1) {
-            _color1 = color1;
+        if (_colorTriangle != colorTriangle) {
+            _colorTriangle = colorTriangle;
             _optionChanged = true;
         }
 
-        // Color - color 2
+        // Color - color background
         EditorGUILayout.BeginHorizontal();
-        EditorGUILayout.LabelField("Color 2", GUILayout.Width(70));
-        Color color2 = EditorGUILayout.ColorField(_color2);
+        EditorGUILayout.LabelField("Background", GUILayout.Width(100));
+        Color colorBG = EditorGUILayout.ColorField(_colorBG);
         EditorGUILayout.EndHorizontal();
-        if (_color2 != color2) {
-            _color2 = color2;
+        if (_colorBG != colorBG) {
+            _colorBG = colorBG;
             _optionChanged = true;
         }
 
@@ -86,7 +86,7 @@ public class GenerationTriangleTypeA : TextureGeneratorWindow<GenerationTriangle
             Texture2D newTex = new Texture2D(128, 128, TextureFormat.ARGB32, false);
             for (int w = 0; w < 128; w++) {
                 for (int h = 0; h < 128; h++) {
-                    Color c = w > h ? _color1 : _color2;
+                    Color c = w > h ? _colorTriangle : _colorBG;
                     newTex.SetPixel(w, h, c);
                 }
             }
