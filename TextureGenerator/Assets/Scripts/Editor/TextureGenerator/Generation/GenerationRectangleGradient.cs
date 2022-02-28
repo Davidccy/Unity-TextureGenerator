@@ -233,6 +233,7 @@ public class GenerationRectangleGradient : TextureGeneratorWindow<GenerationRect
             float minCenterToSide = Mathf.Min(rectWidth / 2.0f, rectHeight / 2.0f);
 
             t = minCenterToSide != 0 ? Mathf.Clamp(minPointToSide / minCenterToSide, 0, 1) : 0;
+            t = 1 - t;
         }
         else if (_selectedGType == GradientType.ToCenter) {
             float minRectPosX = rectCenter.x - rectWidth / 2.0f;
@@ -246,8 +247,7 @@ public class GenerationRectangleGradient : TextureGeneratorWindow<GenerationRect
             float minPointToSide = Mathf.Min(minPointToSideX, minPointToSideY);
             float minCenterToSide = Mathf.Min(rectWidth / 2.0f, rectHeight / 2.0f);
 
-            t = minCenterToSide != 0 ? Mathf.Clamp(minPointToSide / minCenterToSide, 0, 1) : 0;
-            t = 1 - t;
+            t = minCenterToSide != 0 ? Mathf.Clamp(minPointToSide / minCenterToSide, 0, 1) : 0;            
         }
         else if (_selectedGType == GradientType.ToUp) {
             t = rectHeight != 0 ? (point.y - (rectCenter.y - rectHeight / 2.0f)) / rectHeight : 0;
