@@ -72,7 +72,7 @@ public class ProcessingSplit : TextureGeneratorWindow<ProcessingSplit> {
         if (_targetTextureChanged) {
             if (_targetTexture != null) {
                 // TODO:
-                // rechcheck readable and compressed
+                // Recheck readable and compressed
                 if (!_targetTexture.isReadable) {
                     _textureToSplit = Utility.ConvertToReadableAndDecompressed(_targetTexture);
                 }
