@@ -68,11 +68,7 @@ public class ProcessingColorReplacing : TextureGeneratorWindow<ProcessingColorRe
         // Format converting
         if (_targetTextureChanged) {
             if (_targetTexture != null) {
-                // TODO:
-                // recheck readable and compressed
-                if (!_targetTexture.isReadable) {
-                    _textureToReplace = Utility.ConvertToReadableAndDecompressed(_targetTexture);
-                }
+                _textureToReplace = _targetTexture.Clone();
             }
             else {
                 _textureToReplace = null;

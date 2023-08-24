@@ -71,11 +71,7 @@ public class ProcessingSplit : TextureGeneratorWindow<ProcessingSplit> {
         // Format converting
         if (_targetTextureChanged) {
             if (_targetTexture != null) {
-                // TODO:
-                // Recheck readable and compressed
-                if (!_targetTexture.isReadable) {
-                    _textureToSplit = Utility.ConvertToReadableAndDecompressed(_targetTexture);
-                }
+                _textureToSplit = _targetTexture.Clone();
             }
             else {
                 _textureToSplit = null;
