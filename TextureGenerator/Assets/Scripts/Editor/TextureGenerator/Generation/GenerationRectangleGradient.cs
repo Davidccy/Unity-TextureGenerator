@@ -11,8 +11,14 @@ public class GenerationRectangleGradient : TextureGeneratorWindow<GenerationRect
     }
 
     private enum GradientType { 
-        FromCenter,
-        ToCenter,
+        FromCenterType1,
+        FromCenterType2,
+        FromCenterType3,
+        FromCenterType4,
+        ToCenterType1,
+        ToCenterType2,
+        ToCenterType3,
+        ToCenterType4,
         ToUp,
         ToDown,
         ToLeft,
@@ -27,7 +33,7 @@ public class GenerationRectangleGradient : TextureGeneratorWindow<GenerationRect
     private Gradient _colorGradient = new Gradient();
     private Gradient _colorGradientTemp = new Gradient();
     private Color _colorBackground = Color.green;
-    private GradientType _selectedGType = GradientType.FromCenter;
+    private GradientType _selectedGType = GradientType.FromCenterType1;
 
     // Length
     private int _defaultLength = 128;
@@ -220,22 +226,41 @@ public class GenerationRectangleGradient : TextureGeneratorWindow<GenerationRect
 
     private Color GetGradientColor(Vector2 point, Vector2 rectCenter, int rectWidth, int rectHeight) {
         float t = 0;
-        if (_selectedGType == GradientType.FromCenter) {
+        if (_selectedGType == GradientType.FromCenterType1) {
             float minRectPosX = rectCenter.x - rectWidth / 2.0f;
             float maxRectPosX = rectCenter.x + rectWidth / 2.0f;
-            float minPointToSideX = Mathf.Min(Mathf.Abs(point.x - minRectPosX), Mathf.Abs(point.x - maxRectPosX));
+            float minDistancePointToSideX = Mathf.Min(Mathf.Abs(point.x - minRectPosX), Mathf.Abs(point.x - maxRectPosX));
 
             float minRectPosY = rectCenter.y - rectHeight / 2.0f;
             float maxRectPosY = rectCenter.y + rectHeight / 2.0f;
-            float minPointToSideY = Mathf.Min(Mathf.Abs(point.y - minRectPosY), Mathf.Abs(point.y - maxRectPosY));
+            float minDistancePointToSideY = Mathf.Min(Mathf.Abs(point.y - minRectPosY), Mathf.Abs(point.y - maxRectPosY));
 
-            float minPointToSide = Mathf.Min(minPointToSideX, minPointToSideY);
-            float minCenterToSide = Mathf.Min(rectWidth / 2.0f, rectHeight / 2.0f);
+            float minDistancePointToSide = Mathf.Min(minDistancePointToSideX, minDistancePointToSideY);
+            float minDistanceCenterToSide = Mathf.Min(rectWidth / 2.0f, rectHeight / 2.0f);
 
-            t = minCenterToSide != 0 ? Mathf.Clamp(minPointToSide / minCenterToSide, 0, 1) : 0;
+            t = minDistanceCenterToSide != 0 ? Mathf.Clamp(minDistancePointToSide / minDistanceCenterToSide, 0, 1) : 0;
             t = 1 - t;
         }
-        else if (_selectedGType == GradientType.ToCenter) {
+        else if (_selectedGType == GradientType.FromCenterType2) {
+            float distanceCenterToPointX = Mathf.Abs(point.x - rectCenter.x);
+            float distanceRatioX = Mathf.Clamp01(distanceCenterToPointX / (rectWidth / 2.0f));
+
+            float distanceCenterToPointY = Mathf.Abs(point.y - rectCenter.y);
+            float distanceRatioY = Mathf.Clamp01(distanceCenterToPointY / (rectHeight / 2.0f));
+
+            t = Mathf.Max(distanceRatioX, distanceRatioY);
+        }
+        else if (_selectedGType == GradientType.FromCenterType3) {
+            float distanceCenterToPointX = Mathf.Abs(point.x - rectCenter.x);
+
+            t = Mathf.Clamp01(distanceCenterToPointX / (rectWidth / 2.0f));
+        }
+        else if (_selectedGType == GradientType.FromCenterType4) {
+            float distanceCenterToPointY = Mathf.Abs(point.y - rectCenter.y);
+
+            t = Mathf.Clamp01(distanceCenterToPointY / (rectHeight / 2.0f));
+        }
+        else if (_selectedGType == GradientType.ToCenterType1) {
             float minRectPosX = rectCenter.x - rectWidth / 2.0f;
             float maxRectPosX = rectCenter.x + rectWidth / 2.0f;
             float minPointToSideX = Mathf.Min(Mathf.Abs(point.x - minRectPosX), Mathf.Abs(point.x - maxRectPosX));
@@ -248,6 +273,28 @@ public class GenerationRectangleGradient : TextureGeneratorWindow<GenerationRect
             float minCenterToSide = Mathf.Min(rectWidth / 2.0f, rectHeight / 2.0f);
 
             t = minCenterToSide != 0 ? Mathf.Clamp(minPointToSide / minCenterToSide, 0, 1) : 0;            
+        }
+        else if (_selectedGType == GradientType.ToCenterType2) {
+            float distanceCenterToPointX = Mathf.Abs(point.x - rectCenter.x);
+            float distanceRatioX = Mathf.Clamp01(distanceCenterToPointX / (rectWidth / 2.0f));
+
+            float distanceCenterToPointY = Mathf.Abs(point.y - rectCenter.y);
+            float distanceRatioY = Mathf.Clamp01(distanceCenterToPointY / (rectHeight / 2.0f));
+
+            t = Mathf.Max(distanceRatioX, distanceRatioY);
+            t = 1 - t;
+        }
+        else if (_selectedGType == GradientType.ToCenterType3) {
+            float distanceCenterToPointX = Mathf.Abs(point.x - rectCenter.x);
+
+            t = Mathf.Clamp01(distanceCenterToPointX / (rectWidth / 2.0f));
+            t = 1 - t;
+        }
+        else if (_selectedGType == GradientType.ToCenterType4) {
+            float distanceCenterToPointY = Mathf.Abs(point.y - rectCenter.y);
+
+            t = Mathf.Clamp01(distanceCenterToPointY / (rectHeight / 2.0f));
+            t = 1 - t;
         }
         else if (_selectedGType == GradientType.ToUp) {
             t = rectHeight != 0 ? (point.y - (rectCenter.y - rectHeight / 2.0f)) / rectHeight : 0;
